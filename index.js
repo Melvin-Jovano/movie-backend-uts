@@ -10,23 +10,14 @@ app.use(express.json())
 const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
 let allMovies = JSON.parse(getMovieFile);
 
-// delete movie
-app.delete('/movie/:id', (req, res) => {
-    let isFound = false;
-    allMovies = allMovies.filter((x => {
-        if(x.id == req.params.id) isFound = true;
-        return x.id != req.params.id;
-    }));
-    if(isFound) res.status(200).json({"message": "Movie deleted successfull", "data": allMovies});
-    else res.status(200).json({"message": "Movie is not found", "data": allMovies});
-})
-
+// all movies
 app.get('/movies', (req, res) => {
     const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
     const allMovies = JSON.parse(getMovieFile);
     res.send(allMovies);
 });
 
+// search movie
 app.get("/movie/:id", (req, res)=>{
     const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
     const allMovies = JSON.parse(getMovieFile);
@@ -38,6 +29,7 @@ app.get("/movie/:id", (req, res)=>{
     res.status(404).json({"message" : "Movie is not found"})
 })
 
+// update movie data 
 app.put("/movie/:id", (req, res)=>{
     const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
     const allMovies = JSON.parse(getMovieFile);
@@ -49,6 +41,17 @@ app.put("/movie/:id", (req, res)=>{
         }
     });
     res.status(404).json({"message" : "Movie is not found"})
+})
+
+// delete movie
+app.delete('/movie/:id', (req, res) => {
+    let isFound = false;
+    allMovies = allMovies.filter((x => {
+        if(x.id == req.params.id) isFound = true;
+        return x.id != req.params.id;
+    }));
+    if(isFound) res.status(200).json({"message": "Movie deleted successfull", "data": allMovies});
+    else res.status(200).json({"message": "Movie is not found", "data": allMovies});
 })
 
 app.listen(port, () => {
