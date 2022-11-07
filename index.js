@@ -1,59 +1,14 @@
-import express, { json } from "express";
+import ExpressLoader from "./loaders/express.js";
+import movieRoutes from './routes/movie.js';
 import * as dotenv from 'dotenv';
-import fs from 'fs';
-import { type } from "os";
 dotenv.config();
 
-const [port, app] = [Number(process.env.PORT), express()];
-app.use(express.json())
+const port = Number(process.env.PORT || 3000);
 
-const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
-let allMovies = JSON.parse(getMovieFile);
+const Express = new ExpressLoader({port, endpoints: movieRoutes}, 
+    () => {
+        console.log(`Server Started At Port ${port}`);
+    }
+);
 
-// all movies
-app.get('/movies', (req, res) => {
-    const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
-    const allMovies = JSON.parse(getMovieFile);
-    res.send(allMovies);
-});
-
-// search movie
-app.get("/movie/:id", (req, res)=>{
-    const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
-    const allMovies = JSON.parse(getMovieFile);
-    allMovies.forEach(movie => {
-        if(movie["id"] === Number(req.params.id)){
-            res.send(movie)
-        }
-    });
-    res.status(404).json({"message" : "Movie is not found"})
-})
-
-// update movie data 
-app.put("/movie/:id", (req, res)=>{
-    const getMovieFile = fs.readFileSync('assets/tmdb_movies.json');
-    const allMovies = JSON.parse(getMovieFile);
-    allMovies.forEach(movie => {
-        if(movie["id"] === Number(req.params.id)){
-            movie["budget"] = req.body.budget
-            fs.writeFileSync('assets/tmdb_movies.json', JSON.stringify(allMovies))
-            res.json({"id" : movie["id"], "budget" : movie["budget"]})
-        }
-    });
-    res.status(404).json({"message" : "Movie is not found"})
-})
-
-// delete movie
-app.delete('/movie/:id', (req, res) => {
-    let isFound = false;
-    allMovies = allMovies.filter((x => {
-        if(x.id == req.params.id) isFound = true;
-        return x.id != req.params.id;
-    }));
-    if(isFound) res.status(200).json({"message": "Movie deleted successfull", "data": allMovies});
-    else res.status(200).json({"message": "Movie is not found", "data": allMovies});
-})
-
-app.listen(port, () => {
-    console.log(`Server Started At Port ${port}`);
-});
+Express.startServer();
